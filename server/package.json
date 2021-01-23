@@ -1,0 +1,17 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "node backend",
+  "main": "index.js",
+  "author": "Naveen",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "redis": "^3.0.2",
+    "socket.io": "^3.1.0"
+  },
+  "scripts": {
+    "start": "nodemon index.js"
+  }
+}
