@@ -23,44 +23,43 @@ app.get("/", (req, res) => {
 console.log(`Connecting to REDIS @ ${REDIS_HOST}`);
 const liveUsers = io.of(`/join`);
 liveUsers.on("connection", (socket) => {
-  const workspace = socket.nsp;
-
   socket.on("userjoin", (data) => {
     let newUser =
       users.filter((u) => u.id === data.id).length === 0 ? true : false;
     if (newUser) {
       users.push(data);
-      workspace.emit("new-user-joined", users);
+      io.of(`/join`).emit("new-user-joined", users);
     }
   });
 });
 
 const liveChat = io.of(`/chat`);
-const redis_instance = redis.createClient({
+const publisher = redis.createClient({
   host: REDIS_HOST,
 });
 liveChat.on("connection", (socket) => {
-  console.log("New connection!");
-
-  const workspace = socket.nsp;
+  console.log(`New connection ${socket.id}!`);
   const channel = `MESSAGES`;
 
-  redis_instance.subscribe(channel);
+  const subscriber = redis.createClient({
+    host: REDIS_HOST,
+  });
+  subscriber.subscribe(channel);
+
   socket.on("disconnect", () => {
     console.log("Disconnected!");
-    if (redis_instance) {
-      redis_instance.unsubscribe(channel);
-      redis_instance.quit();
-    }
+    // subscriber.unsubscribe(channel);
+    // subscriber.quit();
+    // publisher.quit();
   });
 
-  socket.on("message", (message) => {
-    console.log(message);
-    redis_instance.publish(channel, JSON.stringify(message));
+  socket.on("send-message", (message, callback) => {
+    publisher.publish(channel, JSON.stringify(message));
+    callback();
   });
 
-  redis_instance.on("message", function (channel, data) {
-    workspace.emit("message", JSON.parse(data));
+  subscriber.on("message", function (channel, data) {
+    socket.broadcast.emit("message", JSON.parse(data));
   });
 });
 

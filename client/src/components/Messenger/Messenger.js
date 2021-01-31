@@ -1,9 +1,23 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import io from "socket.io-client";
 import { AppContext } from "../../context/AppContext";
+import { BsCaretLeft } from "react-icons/bs";
+import "./Messenger.scss";
 
 let socket = null;
+
+const UserMessage = ({ message }) => (
+  <div className="user-msg">
+    <span>{message}</span>
+  </div>
+);
+
+const ContactMessage = ({ message }) => (
+  <div className="contact-msg">
+    <span>{message}</span>
+  </div>
+);
 
 const Messenger = () => {
   if (!socket) {
@@ -14,7 +28,7 @@ const Messenger = () => {
   }
 
   const { user, users } = useContext(AppContext);
-  const userId = new URLSearchParams(useLocation().search).get("userId");
+  const { userId } = useParams();
   const [form, setForm] = useState({
     from: {},
     to: {},
@@ -27,14 +41,17 @@ const Messenger = () => {
     setForm({
       ...form,
       from: user,
-      to: users ? users.filter((u) => u.id === user.id)[0] : {},
+      to: users && userId ? users.filter((u) => u.id === userId)[0] : {},
     });
-  }, [user, users]);
+    setMessages([]);
+  }, [user, users, userId]);
 
   useEffect(() => {
     if (socket) {
       socket.on("message", (message) => {
-        console.log(message);
+        setMessages((oldMessages) => {
+          return [...oldMessages, message];
+        });
       });
     }
     return () => {
@@ -47,14 +64,36 @@ const Messenger = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(form);
+    if (form.message !== "") {
+      socket.emit("send-message", form, () => {
+        setForm((oldForm) => {
+          return { ...oldForm, message: "" };
+        });
+      });
+    }
   };
 
   if (!userId) return null;
 
   return (
     <main className="messenger">
-      <p>{userId}</p>
+      <h1>
+        {window.innerWidth < 769 && (
+          <Link to="/">
+            <BsCaretLeft color="#0082fb" />
+          </Link>
+        )}
+        {users.filter((u) => u.id === userId)[0].name}
+      </h1>
+      <div>
+        {messages.map((m) => {
+          if (m.from.id === user.id) {
+            return <UserMessage message={m.message} />;
+          } else if (m.from.id === userId) {
+            return <ContactMessage message={m.message} />;
+          }
+        })}
+      </div>
       <form onSubmit={handleSubmit}>
         <input
           value={message}

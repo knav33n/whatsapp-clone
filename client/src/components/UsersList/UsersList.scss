@@ -1,0 +1,31 @@
+.user-list {
+  width: 30%;
+  height: 100vh;
+  overflow-y: scroll;
+  box-shadow: -1px 0px 5px 1px #333;
+  p {
+    font-size: 1.5rem;
+    padding: 2rem;
+    text-align: center;
+  }
+  a {
+    text-decoration: none;
+    color: #333;
+  }
+  .user {
+    padding: 1rem;
+    display: flex;
+    cursor: pointer;
+    &:hover {
+      background: #ccc;
+    }
+    img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: inline-block;
+      margin-right: 1rem;
+    }
+  }
+}

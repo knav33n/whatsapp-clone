@@ -1,7 +1,7 @@
 import faker from "faker";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom";
+import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import "reset-css";
 import Messenger from "./components/Messenger/Messenger";
 import UsersList from "./components/UsersList/UsersList";
@@ -68,12 +68,35 @@ const App = () => {
 
   return (
     <AppContext.Provider value={{ user: loggedInUser, users: usersOnline }}>
-      <Router>
-        <section className="app">
-          <UsersList />
-          <Messenger />
-        </section>
-      </Router>
+      {window.innerWidth < 769 && (
+        <Router>
+          <section className="app">
+            <Switch>
+              <Route path="/user/:userId">
+                <Messenger />
+              </Route>
+              <Route path="/">
+                <UsersList />
+              </Route>
+            </Switch>
+          </section>
+        </Router>
+      )}
+      {window.innerWidth > 768 && (
+        <Router>
+          <section className="app">
+            <UsersList />
+            <Switch>
+              <Route path="/user/:userId">
+                <Messenger />
+              </Route>
+              <Route path="/">
+                <></>
+              </Route>
+            </Switch>
+          </section>
+        </Router>
+      )}
     </AppContext.Provider>
   );
 };

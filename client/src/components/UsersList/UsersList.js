@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AppContext } from "../../context/AppContext";
+import "./UsersList.scss";
 
 const UsersList = () => {
   const { user, users } = useContext(AppContext);
@@ -14,7 +15,7 @@ const UsersList = () => {
         users
           .filter((u) => u.id !== user.id)
           .map((u) => (
-            <Link to={`?userId=${u.id}`} key={u.id}>
+            <Link to={`/user/${u.id}`} key={u.id}>
               <div className="user">
                 <img src="https://picsum.photos/200" />
                 <div className="user__conv">
